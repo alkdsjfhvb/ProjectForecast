@@ -49,7 +49,7 @@ def forecast(ticker : str):
     plt.show()
 
     paths_list = price_paths.tolist()
-
+#krfnnme
     return {
         "ticker": ticker.upper(),
         "last_price": last_price,
