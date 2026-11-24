@@ -18,7 +18,7 @@ def forecast(ticker : str):
     # 80 + x%.80 = 100  do the math, and we get ->    x = (100-80/80)*100
     # formula for pct change = 100 * (P_new - P_old)/P_old
     # When pct_change is positive -> growth and vice versa when it's negative
-#jdhfkej
+
     returns = prices.pct_change().dropna()
     daily_stdev = float(returns.std())
     last_price = float(prices.iloc[-1])
@@ -49,7 +49,7 @@ def forecast(ticker : str):
     plt.show()
 
     paths_list = price_paths.tolist()
-#krfnnme
+
     return {
         "ticker": ticker.upper(),
         "last_price": last_price,
