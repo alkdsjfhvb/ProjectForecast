@@ -29,36 +29,45 @@ def forecast(ticker : str):
     # therefore making the prediction of the price less reliable
     # its formula is calculating the means of the prices basically and gives a range for the computer to choose from.
     # number of simulations
-    num_simulations = 5
 
-    num_days = 252
+    num_simulations = 800
 
-    random_shocks = np.random.normal(0, daily_stdev, (num_days, num_simulations))
-    price_paths = last_price * (1 + random_shocks).cumprod(axis=0)
+    num_days = 100
 
-    # random_shocks uses the standard deviation to pick a random percentage return in that range
-    # price_paths forms each point in the grid using the random shock. cumprod is like an exponential value:
-    # each new price depends on the last, thus we multiply the old predicative with the random stdev the computer chose
-    # That is how we get our new price, that is how AAPL got their first price in our data set
+    current_prices = np.full(num_simulations, last_price)  # row with 500 of the same last prices of the appl stock
 
-    print(daily_stdev)
+    # creates a table for the end points assigned to each day: rows = Day 0..num_days, cols = simulations ( filled with zeros)
+    price_paths = np.zeros((num_days + 1, num_simulations))
+    price_paths[0] = current_prices  # the first day is always the last price of the appl stock
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(price_paths)
-    plt.title("Monte Carlo Simulation of AAPL")
+    # Store the median price at the end of each day (Day 0..252)
+    median_at_each_day = np.zeros(
+        num_days + 1)  # creates a premade list of 0 for all the days +1 reserved for the first day
+    median_at_each_day[0] = np.median(current_prices)  # sets the first day to be the last price of the appl stock
+
+    for day in range(num_days):  # does this for each of the days to return a table with end points for each of the days
+        median_price = np.median(current_prices)  # gets the median end price for the day
+        shocks = np.random.normal(0, daily_stdev, num_simulations)
+        # chooses a random percentage for each simulation
+
+        current_prices = median_price * (1 + shocks)  # returns a list of the upgraded current price for the day
+
+        price_paths[day + 1] = current_prices  # puts the current price assigned for the enxt days
+        median_at_each_day[day + 1] = np.median(
+            current_prices)  # gets the median of prices for this specific day to use for the next days
+
+    # ========= plotting =========
+
+    plt.plot(median_at_each_day, color="black", linewidth=2, label="Daily median")
+    plt.xlabel("Trading Days")
+    plt.ylabel("Price ($)")
+    plt.legend()
     plt.show()
 
-    paths_list = price_paths.tolist()
-
-    return {
-        "ticker": ticker.upper(),
-        "last_price": last_price,
-        "daily_stdev": daily_stdev,
-        "forecast_paths": paths_list
-    }
     # so to summarize: standard deviation creates a "radius" of points filled with the percentage return.
-    # Then, random_shocks groups it under a variable scattered across the number of days and simulations.
-    # Lastly, price_paths generates each point by: multiplies it by those scattered percentage returns day-by-day,
-    # generating the final dollar-value points in the grid.
+    # Then, we set the starting price to be the last of the appl stock.
+    # After that we create a new shock for each day, filling a 2d array with: rows =  number of days + 1 for the first reserved
+    # cols = reserved zeroes to fill in later
+    # For each day we update the median end price and set it to be the new current price for the next day
 
 
